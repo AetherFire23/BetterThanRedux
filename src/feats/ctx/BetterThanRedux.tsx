@@ -1,18 +1,5 @@
-import {createContext, useContext, useState} from 'react';
+import {createContext, useState} from 'react';
 import {Draft, produce} from "immer";
-
-// interface State {
-//     someNum: number,
-// }
-//
-// interface PassedContext {
-//     state: State,
-//     // createNextState: (state: WritableDraft<State>) => State
-//     produceNextState: (writerFn: (writableState: WritableDraft<State>) => void) => void,
-// }
-// The value of the Context must be matching exactly the value of the value that will be passed down the tree.
-// Need a function to create the ctx
-// export const GenericContexter = createContext<PassedContext | null>(null);
 
 interface GenericPassedContext<TState> {
     state: TState,
@@ -22,36 +9,25 @@ interface GenericPassedContext<TState> {
 // create the context that can be nullable
 export function createCoolContext<TState>() {
     const newContext = createContext<GenericPassedContext<TState>>({} as never)
-
     return newContext
 }
 
-// but always useContext using the strict one
-export function useStrictContext<T>(pCtx: React.Context<T>) {
-    const ctx = useContext(pCtx)
-
-    if (ctx === null) {
-        throw new Error("dude why...")
-    }
-
-    return ctx
-}
-
-// {} === any NON-NULLISH value.
 export function StrictGenericContexterContextProvider<TState>({children, ctx, defaultValue}:
                                                               {
                                                                   children: React.ReactNode,
                                                                   ctx: React.Context<GenericPassedContext<TState>>,
                                                                   defaultValue?: TState,
                                                               }) {
-
+    // {} === any NON-NULLISH value.
     const initialState: TState = defaultValue === undefined
-        ? {} as never
+        ? {} as never // This allows a default value to be passed OR NOT without making typescript suepr mad.
+        // Essentially, it will think that tehre is a defualt value, but there is none.
         : defaultValue
 
     const [state, setState] = useState<TState>(initialState)
 
-    const passed: GenericPassedContext<TState> = {
+    // This is the provided value, it passes down the current state
+    const providedValue: GenericPassedContext<TState> = {
         // When called, its gonna ask for the writableDraft callback
         produceNextState: (writerFn) => {
             const nextState = produce(state, draft => {
@@ -65,9 +41,8 @@ export function StrictGenericContexterContextProvider<TState>({children, ctx, de
     }
 
     return (
-        <ctx.Provider value={passed}>
+        <ctx.Provider value={providedValue}>
             {children}
         </ctx.Provider>
     )
 }
-
