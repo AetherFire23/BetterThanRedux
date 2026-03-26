@@ -13,4 +13,5 @@ Basically is this project is a wrapper over context + immer + usestate. It's ter
     }
 ```
 
-Basically context is injected, avoiding prop drilling, and it avoids some of the ceremony of plugging redux inside a project (use Redux plz)
+
+Basically context is injected, avoiding prop drilling, it's using Immer to make observable updates to the state (including collections) therefore the syntax can be much more concise than react's default usetate for complex objects and collections, and it avoids some of the ceremony of plugging redux inside a project ( but use Redux plz)
